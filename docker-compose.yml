@@ -1,0 +1,41 @@
+version: '3.5'
+
+services:
+
+  rproxy:
+    container_name: rproxy
+    image: nginx:${NGINX_TAG}
+    ports:
+      - ${RPROXY_HTTP}:80
+      - ${RPROXY_HTTPS}:443
+    volumes:
+      - ./rproxy/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./rproxy/index.html:/usr/share/nginx/html/index.html:ro
+      - ./letsencrypt/etc:/etc/nginx/certs
+      - ./letsencrypt/www:/var/www/letsencrypt
+    networks:
+      default:
+        ipv4_address: ${RPROXY_IP}
+    extra_hosts:
+      - "ping:${PING_IP}"
+
+  letsencrypt:
+    container_name: certbot
+    image: certbot/certbot
+    command: renew
+    volumes:
+      - ./letsencrypt/etc:/etc/letsencrypt
+      - ./letsencrypt/lib:/var/lib/letsencrypt
+      - ./letsencrypt/www:/var/www/letsencrypt
+      - ./letsencrypt/log:/var/log/letsencrypt
+
+
+networks:
+
+  default:
+    name: ${SUBNET_NAME}
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: ${SUBNET}

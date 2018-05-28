@@ -1,0 +1,12 @@
+version: '3.5'
+
+services:
+
+  ping:
+    container_name: ping
+    image: nginx:${NGINX_TAG}
+    volumes:
+      - ./ping/index.html:/usr/share/nginx/html/index.html:ro
+    networks:
+      default:
+        ipv4_address: ${PING_IP}
